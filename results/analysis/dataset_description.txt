@@ -1,0 +1,11 @@
+| Property       | StatKick                          |
+| -------------- | --------------------------------- |
+| Domain         | Football                          |
+| Season         | 2024–25                           |
+| Coverage       | Big 5 European leagues            |
+| Records        | 2,274 players                     |
+| Variables      | 34                                |
+| Data type      | Numerical + categorical           |
+| Primary entity | Player                            |
+| Source         | FBref-derived dataset             |
+| Main use       | Player performance/style analysis |
