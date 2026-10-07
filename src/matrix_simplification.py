@@ -106,24 +106,18 @@ def rref(matrix, tolerance=1e-10):
 
 def main():
 
-    # --------------------------------------------------
     # 1. Create matrix X
-    # --------------------------------------------------
 
     X, feature_columns = load_and_prepare_data()
 
     print("Original matrix shape:")
     print(X.shape)
 
-    # --------------------------------------------------
     # 2. Perform RREF
-    # --------------------------------------------------
 
     R, pivot_columns = rref(X)
 
-    # --------------------------------------------------
     # 3. Display matrix structure
-    # --------------------------------------------------
 
     print("\nRank of matrix:")
     print(len(pivot_columns))
@@ -135,9 +129,7 @@ def main():
             f"{column + 1}. {feature_columns[column]}"
         )
 
-    # --------------------------------------------------
     # 4. Find free columns
-    # --------------------------------------------------
 
     free_columns = [
         i for i in range(len(feature_columns))
@@ -154,9 +146,7 @@ def main():
     else:
         print("None")
 
-    # --------------------------------------------------
     # 5. Display a small section of the RREF
-    # --------------------------------------------------
 
     print("\nFirst 10 rows of RREF:")
     print(
