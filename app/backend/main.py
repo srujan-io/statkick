@@ -1,10 +1,18 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="StatKick API",
     description="Football player similarity and playing style analysis",
     version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 DATA_PATH = "data/raw/players.csv"
@@ -118,10 +126,16 @@ def get_player(player_name: str):
         "player": player["Player"],
         "nation": player["Nation"],
         "position": player["Position"],
-        "age": player["Age"],
-        "minutes": player["Minutes"],
-        "statistics": statistics,
-        "pca": pca_coordinates
+        "age": int(player["Age"]),
+        "minutes": int(player["Minutes"]),
+        "statistics": {
+            name: float(value)
+            for name, value in statistics.items()
+        },
+        "pca": {
+            component: float(value)
+            for component, value in pca_coordinates.items()
+        }
     }
 
 @app.get("/players/{player_name}/similar")
