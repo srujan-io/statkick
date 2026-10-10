@@ -1,15 +1,23 @@
 from fastapi import FastAPI, HTTPException
-import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
+import pandas as pd
 
 app = FastAPI(
     title="StatKick API",
     description="Football player similarity and playing style analysis",
     version="1.0.0"
 )
+
+# CORS: allow the deployed Vercel frontend and local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origins=[
+        "https://statkick-six.vercel.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -74,13 +82,11 @@ def get_players():
 
 @app.get("/players/{player_name}")
 def get_player(player_name: str):
-
     df = load_players()
     pca_df = load_pca()
 
     matches = df[
-        df["Player"].str.lower()
-        == player_name.lower()
+        df["Player"].str.lower() == player_name.lower()
     ]
 
     if matches.empty:
@@ -90,9 +96,7 @@ def get_player(player_name: str):
         )
 
     index = matches.index[0]
-
     player = matches.iloc[0]
-
     pca_player = pca_df.iloc[index]
 
     statistics = {
@@ -138,6 +142,7 @@ def get_player(player_name: str):
         }
     }
 
+
 @app.get("/players/{player_name}/similar")
 def get_similar_players(
     player_name: str,
@@ -147,8 +152,7 @@ def get_similar_players(
     pca_df = load_pca()
 
     matches = df[
-        df["Player"].str.lower()
-        == player_name.lower()
+        df["Player"].str.lower() == player_name.lower()
     ]
 
     if matches.empty:
@@ -159,7 +163,7 @@ def get_similar_players(
 
     player_index = matches.index[0]
 
-    # Use first 5 principal components
+    # Use the first five principal components
     pca_columns = [
         "PC1",
         "PC2",
@@ -177,12 +181,12 @@ def get_similar_players(
         pca_columns
     ].to_numpy(dtype=float)
 
-    # Euclidean distance in 5D PCA space
+    # Euclidean distance in five-dimensional PCA space
     distances = (
         (all_scores - target) ** 2
     ).sum(axis=1) ** 0.5
 
-    # Exclude all rows belonging to the selected player
+    # Exclude the selected player from the results
     target_name = matches.iloc[0]["Player"]
 
     same_player = (
@@ -191,12 +195,14 @@ def get_similar_players(
 
     distances[same_player] = float("inf")
 
+    # Prevent invalid limits and oversized responses
+    limit = max(1, min(limit, 50))
+
     nearest_indices = distances.argsort()[:limit]
 
     similar_players = []
 
     for index in nearest_indices:
-
         similar_players.append({
             "player": df.iloc[index]["Player"],
             "position": df.iloc[index]["Position"],
@@ -214,26 +220,15 @@ def get_similar_players(
         "similar_players": similar_players
     }
 
+
 @app.get("/pca")
 def get_pca_data():
-
     df = load_players()
     pca_df = load_pca()
-
-    pca_columns = [
-        "PC1",
-        "PC2",
-        "PC3",
-        "PC4",
-        "PC5",
-        "PC6",
-        "PC7"
-    ]
 
     result = []
 
     for index in range(len(df)):
-
         result.append({
             "player": df.iloc[index]["Player"],
             "position": df.iloc[index]["Position"],
@@ -261,9 +256,9 @@ def get_pca_data():
         "players": result
     }
 
+
 @app.get("/stats")
 def get_stats():
-
     return {
         "players": 2274,
         "features": 7,
